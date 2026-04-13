@@ -87,7 +87,6 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("☕ Скинуто адміном")
 
-
 async def countdown_message(bot, chat_id, message_id, seconds):
     while seconds >= 0:
         mins = seconds // 60
