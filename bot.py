@@ -82,7 +82,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("⛔ Немає доступу")
             return
 
-    global kettle_busy_until
+    
     kettle_busy_until = 0
 
     await update.message.reply_text("☕ Скинуто адміном")
