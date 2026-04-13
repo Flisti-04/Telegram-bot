@@ -78,7 +78,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "🛠 Скинути чайник":
 
-    if not is_admin(update):
+        if not is_admin(update):
         await update.message.reply_text("⛔ Немає доступу")
         return
 
