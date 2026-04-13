@@ -76,17 +76,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "🔍 Статус":
         await update.message.reply_text(get_status_text())
 
-
     elif text == "🛠 Скинути чайник":
 
         if not is_admin(update):
             await update.message.reply_text("⛔ Немає доступу")
             return
 
-    
-    kettle_busy_until = 0
-
-    await update.message.reply_text("☕ Скинуто адміном")
+        kettle_busy_until = 0
+        await update.message.reply_text("☕ Скинуто адміном")
 
 async def countdown_message(bot, chat_id, message_id, seconds):
     while seconds >= 0:
