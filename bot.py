@@ -50,25 +50,25 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text == "☕ Увімкнути чайник":
 
-        now = time.time()
+    now = time.time()
 
     if now < kettle_busy_until:
         remaining = int(kettle_busy_until - now)
 
-    await update.message.reply_text(
-        f"⛔ СТОП! НЕ ВМИКАТИ!\n"
-        f"☕ Чайник вже увімкнено\n"
-        f"⏳ {remaining//60}:{remaining%60:02d}"
-    )
-    return
-
-        kettle_busy_until = now + 7 * 60
-
-        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
-
-        asyncio.create_task(
-            countdown_message(context.bot, chat_id, msg.message_id, 7*60)
+        await update.message.reply_text(
+            f"⛔ СТОП! НЕ ВМИКАТИ!\n"
+            f"☕ Чайник вже увімкнено\n"
+            f"⏳ {remaining//60}:{remaining%60:02d}"
         )
+        return
+
+    kettle_busy_until = now + 7 * 60
+
+    msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
+
+    asyncio.create_task(
+        countdown_message(context.bot, chat_id, msg.message_id, 7*60)
+    )
 
         for user in users:
             try:
