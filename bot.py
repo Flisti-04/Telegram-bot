@@ -9,31 +9,24 @@ TOKEN = os.getenv("BOT_TOKEN")
 users = set()
 kettle_busy_until = 0
 
-keyboard = ReplyKeyboardMarkup([["☕ Увімкнути чайник"]], resize_keyboard=True)
+keyboard = ReplyKeyboardMarkup(
+    [["☕ Увімкнути чайник", "🔍 Статус"]],
+    resize_keyboard=True
+)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users.add(update.effective_chat.id)
-    await update.message.reply_text("Додано в систему ☕", reply_markup=keyboard)
+    await update.message.reply_text("Система активна ☕", reply_markup=keyboard)
 
 
-async def countdown_message(bot, chat_id, message_id, seconds):
-    while seconds >= 0:
-        mins = seconds // 60
-        secs = seconds % 60
+def get_status_text():
+    now = time.time()
 
-        text = f"☕ Чайник увімкнено\n⏳ {mins}:{secs:02d}\nНЕ ВМИКАЙ СВІЙ ⚠️"
-
-        try:
-            await bot.edit_message_text(
-                chat_id=chat_id,
-                message_id=message_id,
-                text=text
-            )
-        except:
-            pass
-
-        await asyncio.sleep(1)
-        seconds -= 1
+    if now < kettle_busy_until:
+        remaining = int(kettle_busy_until - now)
+        return f"☕ Чайник УВІМКНЕНО\n⏳ {remaining//60}:{remaining%60:02d}"
+    else:
+        return "☕ Чайник ВІЛЬНИЙ ✅"
 
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -47,29 +40,44 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         now = time.time()
 
         if now < kettle_busy_until:
-            remaining = int(kettle_busy_until - now)
-            await update.message.reply_text(f"⚠️ Зайнято ще {remaining//60}:{remaining%60:02d}")
+            await update.message.reply_text(get_status_text())
             return
 
         kettle_busy_until = now + 7 * 60
 
-        # повідомлення з таймером
-        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00\nНЕ ВМИКАЙ СВІЙ ⚠️")
+        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
 
-        # запускаємо таймер
         asyncio.create_task(
-            countdown_message(context.bot, update.effective_chat.id, msg.message_id, 7*60)
+            countdown_message(context.bot, chat_id, msg.message_id, 7*60)
         )
 
-        # повідомляємо всіх
         for user in users:
             try:
                 await context.bot.send_message(
                     chat_id=user,
-                    text="☕ УВАГА! ЧАЙНИК УВІМКНЕНО ⚠️"
+                    text="⚠️ ЧАЙНИК УВІМКНЕНО!"
                 )
             except:
                 pass
+
+    elif text == "🔍 Статус":
+        await update.message.reply_text(get_status_text())
+
+
+async def countdown_message(bot, chat_id, message_id, seconds):
+    while seconds >= 0:
+        mins = seconds // 60
+        secs = seconds % 60
+
+        text = f"☕ Чайник\n⏳ {mins}:{secs:02d}"
+
+        try:
+            await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
+        except:
+            pass
+
+        await asyncio.sleep(1)
+        seconds -= 1
 
 
 app = Application.builder().token(TOKEN).build()
