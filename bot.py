@@ -27,7 +27,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     await update.message.reply_text(
-        await update.message.reply_text(
     "Система активна ☕",
     reply_markup=keyboard
 )
