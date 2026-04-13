@@ -52,14 +52,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         now = time.time()
 
-    if now < kettle_busy_until:
-        remaining = int(kettle_busy_until - now)
-
-        await update.message.reply_text(
-        f"⛔ СТОП! НЕ ВМИКАТИ!\n\n"
-        f"{get_status_text()}"
-    )
-        return
+        if now < kettle_busy_until:
+            await update.message.reply_text(get_status_text())
+            return
 
         kettle_busy_until = now + 7 * 60
 
