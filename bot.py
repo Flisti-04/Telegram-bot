@@ -1,3 +1,4 @@
+ADMIN_ID = 1679453575
 import os
 import time
 import asyncio
@@ -10,9 +11,15 @@ users = set()
 kettle_busy_until = 0
 
 keyboard = ReplyKeyboardMarkup(
-    [["☕ Увімкнути чайник", "🔍 Статус"]],
+    [
+        ["☕ Увімкнути чайник", "🔍 Статус"],
+        ["🛠 Скинути чайник"]
+    ],
     resize_keyboard=True
 )
+
+def is_admin(update):
+    return update.effective_user.id == ADMIN_ID
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users.add(update.effective_chat.id)
@@ -67,6 +74,18 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "🔍 Статус":
         await update.message.reply_text(get_status_text())
+
+
+elif text == "🛠 Скинути чайник":
+
+    if not is_admin(update):
+        await update.message.reply_text("⛔ Немає доступу")
+        return
+
+    global kettle_busy_until
+    kettle_busy_until = 0
+
+    await update.message.reply_text("☕ Скинуто адміном")
 
 
 async def countdown_message(bot, chat_id, message_id, seconds):
