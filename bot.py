@@ -16,7 +16,12 @@ keyboard = ReplyKeyboardMarkup(
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users.add(update.effective_chat.id)
-    await update.message.reply_text("Система активна ☕", reply_markup=keyboard)
+
+    user_id = update.effective_user.id
+
+    await update.message.reply_text(
+        f"Система активна ☕\nТвій ID: {user_id}"
+    )
 
 
 def get_status_text():
