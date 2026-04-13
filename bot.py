@@ -27,8 +27,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     await update.message.reply_text(
-        f"Система активна ☕\nТвій ID: {user_id}"
-    )
+        await update.message.reply_text(
+    "Система активна ☕",
+    reply_markup=keyboard
+)
 
 
 def get_status_text():
