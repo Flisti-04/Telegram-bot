@@ -104,24 +104,24 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         now = time.time()
 
-    # якщо вже працює
-    if now < kettle_busy_until:
+        # якщо вже працює
+        if now < kettle_busy_until:
 
-        msg = await update.message.reply_text("☕ Чайник вже працює")
+            msg = await update.message.reply_text("☕ Чайник вже працює")
+
+            asyncio.create_task(
+                countdown_loop(context.bot, chat_id, msg.message_id)
+            )
+            return
+
+        # якщо вільний → стартуємо
+        kettle_busy_until = now + 7 * 60
+
+        msg = await update.message.reply_text("☕ Чайник увімкнено")
 
         asyncio.create_task(
             countdown_loop(context.bot, chat_id, msg.message_id)
         )
-        return
-
-    # якщо вільний → стартуємо
-    kettle_busy_until = now + 7 * 60
-
-    msg = await update.message.reply_text("☕ Чайник увімкнено")
-
-    asyncio.create_task(
-        countdown_loop(context.bot, chat_id, msg.message_id)
-    )
 
     elif text == "🔍 Статус":
         await update_status(context.bot, chat_id)
