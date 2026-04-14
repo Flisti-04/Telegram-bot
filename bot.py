@@ -102,7 +102,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text == "☕ Увімкнути чайник":
 
-    now = time.time()
+        now = time.time()
 
     # якщо вже працює
     if now < kettle_busy_until:
