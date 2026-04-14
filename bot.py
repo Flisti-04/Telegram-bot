@@ -53,6 +53,7 @@ if text == "☕ Увімкнути чайник":
     now = time.time()
 
     if now < kettle_busy_until:
+
         remaining = int(kettle_busy_until - now)
 
         await update.message.reply_text(
@@ -60,6 +61,7 @@ if text == "☕ Увімкнути чайник":
             f"☕ Чайник вже увімкнено\n"
             f"⏳ {remaining//60}:{remaining%60:02d}"
         )
+
         return
 
     kettle_busy_until = now + 7 * 60
@@ -71,7 +73,6 @@ if text == "☕ Увімкнути чайник":
     asyncio.create_task(
         countdown_message(context.bot, chat_id, msg.message_id, 7*60)
     )
-
         for user in users:
             try:
                 await context.bot.send_message(
