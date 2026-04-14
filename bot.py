@@ -64,6 +64,25 @@ async def update_status(bot, chat_id):
     await bot.send_message(chat_id=chat_id, text=text)   
 # --- створення або оновлення повідомлення ---
 
+
+async def countdown_loop(bot, chat_id):
+    global kettle_busy_until
+
+    while True:
+        now = time.time()
+
+        if kettle_busy_until == 0:
+            break
+
+        if now >= kettle_busy_until:
+            kettle_busy_until = 0
+            await bot.send_message(chat_id, "☕ ЧАЙНИК ВІЛЬНИЙ")
+            break
+
+        await update_status(bot, chat_id)
+        await asyncio.sleep(1)
+
+
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global kettle_busy_until
 
@@ -80,21 +99,13 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         kettle_busy_until = now + 7 * 60
 
-        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
+        msg = await update.message.reply_text("☕ Чайник увімкнено")
 
-        status_chat_id = chat_id
-        status_message_id = msg.message_id        
-        asyncio.create_task(
-            countdown_global(context.bot)
-)
-        await update_status(context.bot, chat_id)
-        
+        asyncio.create_task(countdown_loop(context.bot, chat_id))
+
         for user in users:
             try:
-                await context.bot.send_message(
-                    chat_id=user,
-                    text="⚠️ ЧАЙНИК УВІМКНЕНО!"
-                )
+                await context.bot.send_message(user, "⚠️ ЧАЙНИК УВІМКНЕНО")
             except:
                 pass
 
