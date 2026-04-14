@@ -104,14 +104,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         now = time.time()
 
-        if now < kettle_busy_until:
-    remaining = int(kettle_busy_until - now)
+    if now < kettle_busy_until:
+        remaining = int(kettle_busy_until - now)
 
-            await update.message.reply_text(
-        f"⛔ ЧАЙНИК ВЖЕ ПРАЦЮЄ\n"
-        f"⏳ Залишилось: {remaining//60}:{remaining%60:02d}"
-            )
-            return
+        await update.message.reply_text(
+            f"⛔ ЧАЙНИК ВЖЕ ПРАЦЮЄ\n"
+            f"⏳ Залишилось: {remaining//60}:{remaining%60:02d}"
+        )
+        return
         
         kettle_busy_until = now + 7 * 60
 
