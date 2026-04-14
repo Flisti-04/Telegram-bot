@@ -48,43 +48,43 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     chat_id = update.effective_chat.id
 
-if text == "☕ Увімкнути чайник":
+    if text == "☕ Увімкнути чайник":
 
-    now = time.time()
+        now = time.time()
 
-    if now < kettle_busy_until:
-        remaining = int(kettle_busy_until - now)
+        if now < kettle_busy_until:
+            remaining = int(kettle_busy_until - now)
 
-        await update.message.reply_text(
-            f"⛔ СТОП! НЕ ВМИКАТИ!\n"
-            f"☕ Чайник вже увімкнено\n"
-            f"⏳ {remaining//60}:{remaining%60:02d}"
-        )
-        return
-
-    kettle_busy_until = now + 7 * 60
-
-    msg = await update.message.reply_text(
-        "☕ Чайник увімкнено\n⏳ 7:00"
-    )
-
-    asyncio.create_task(
-        countdown_message(context.bot, chat_id, msg.message_id, 7*60)
-    )
-
-    for user in users:
-        try:
-            await context.bot.send_message(
-                chat_id=user,
-                text="⚠️ ЧАЙНИК УВІМКНЕНО!"
+            await update.message.reply_text(
+                f"⛔ СТОП! НЕ ВМИКАТИ!\n"
+                f"☕ Чайник вже увімкнено\n"
+                f"⏳ {remaining//60}:{remaining%60:02d}"
             )
-        except:
-            pass
+            return
 
-        elif text == "🔍 Статус":
+        kettle_busy_until = now + 7 * 60
+
+        msg = await update.message.reply_text(
+            "☕ Чайник увімкнено\n⏳ 7:00"
+        )
+
+        asyncio.create_task(
+            countdown_message(context.bot, chat_id, msg.message_id, 7*60)
+        )
+
+        for user in users:
+            try:
+                await context.bot.send_message(
+                    chat_id=user,
+                    text="⚠️ ЧАЙНИК УВІМКНЕНО!"
+                )
+            except:
+                pass
+
+    elif text == "🔍 Статус":
         await update.message.reply_text(get_status_text())
 
-        elif text == "🛠 Скинути чайник":
+    elif text == "🛠 Скинути чайник":
 
         if not is_admin(update):
             await update.message.reply_text("⛔ Немає доступу")
