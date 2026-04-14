@@ -102,30 +102,26 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text == "☕ Увімкнути чайник":
 
-        now = time.time()
+    now = time.time()
 
-        if now < kettle_busy_until:
-            remaining = int(kettle_busy_until - now)
+    # якщо вже працює
+    if now < kettle_busy_until:
 
-            await update.message.reply_text(
-                f"⛔ ЧАЙНИК ВЖЕ ПРАЦЮЄ\n"
-                f"⏳ Залишилось: {remaining//60}:{remaining%60:02d}"
-            )
-            return
-        
-        kettle_busy_until = now + 7 * 60
-
-        msg = await update.message.reply_text("☕ Чайник увімкнено")
+        msg = await update.message.reply_text("☕ Чайник вже працює")
 
         asyncio.create_task(
             countdown_loop(context.bot, chat_id, msg.message_id)
-)
+        )
+        return
 
-        for user in users:
-            try:
-                await context.bot.send_message(user, "⚠️ ЧАЙНИК УВІМКНЕНО")
-            except:
-                pass
+    # якщо вільний → стартуємо
+    kettle_busy_until = now + 7 * 60
+
+    msg = await update.message.reply_text("☕ Чайник увімкнено")
+
+    asyncio.create_task(
+        countdown_loop(context.bot, chat_id, msg.message_id)
+    )
 
     elif text == "🔍 Статус":
         await update_status(context.bot, chat_id)
@@ -164,41 +160,34 @@ async def countdown_global(bot):
         await asyncio.sleep(1)
 
 
-async def countdown_message(bot, chat_id, message_id, seconds):
-    end_time = time.time() + seconds
-
-    last_text = None
+async def countdown_loop(bot, chat_id, message_id):
+    global kettle_busy_until
 
     while True:
-        remaining = int(end_time - time.time())
+        now = time.time()
+        remaining = int(kettle_busy_until - now)
 
         if remaining <= 0:
             try:
                 await bot.edit_message_text(
                     chat_id=chat_id,
                     message_id=message_id,
-                    text="☕ ЧАЙНИК ВІЛЬНИЙ ✅"
+                    text="☕ ЧАЙНИК ВІЛЬНИЙ"
                 )
-            except Exception as e:
-                print("Final edit error:", e)
+            except:
+                pass
             break
 
-        mins = remaining // 60
-        secs = remaining % 60
+        text = f"☕ Чайник\n⏳ {remaining//60}:{remaining%60:02d}"
 
-        text = f"☕ Чайник\n⏳ {mins}:{secs:02d}"
-
-        # оновлюємо тільки якщо змінилось
-        if text != last_text:
-            try:
-                await bot.edit_message_text(
-                    chat_id=chat_id,
-                    message_id=message_id,
-                    text=text
-                )
-                last_text = text
-            except Exception as e:
-                print("Edit error:", e)
+        try:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=text
+            )
+        except:
+            pass
 
         await asyncio.sleep(1)
 
