@@ -81,10 +81,10 @@ if text == "☕ Увімкнути чайник":
         except:
             pass
 
-    elif text == "🔍 Статус":
+        elif text == "🔍 Статус":
         await update.message.reply_text(get_status_text())
 
-    elif text == "🛠 Скинути чайник":
+        elif text == "🛠 Скинути чайник":
 
         if not is_admin(update):
             await update.message.reply_text("⛔ Немає доступу")
