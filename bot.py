@@ -1,6 +1,4 @@
-status_message_id = None
-status_chat_id = None
-ADMIN_ID = 1679453575
+
 import os
 import time
 import asyncio
@@ -9,7 +7,13 @@ from telegram.ext import Application, CommandHandler, MessageHandler, ContextTyp
 
 TOKEN = os.getenv("BOT_TOKEN")
 
+status_message_id = None
+status_chat_id = None
+ADMIN_ID = 1679453575
 users = set()
+
+
+
 kettle_busy_until = 0
 
 keyboard = ReplyKeyboardMarkup(
@@ -37,7 +41,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def update_status(bot, chat_id):
-    global status_message_id, status_chat_id, kettle_busy_until
+    global status_chat_id, status_message_id, kettle_busy_until
 
     now = time.time()
 
@@ -46,27 +50,24 @@ async def update_status(bot, chat_id):
         text = (
             "☕ СТАТУС ЧАЙНИКА\n\n"
             "🟠 ЗАЙНЯТИЙ\n"
-            f"⏳ Залишилось: {remaining//60}:{remaining%60:02d}\n\n"
-            "🚫 Вмикати не можна"
+            f"⏳ {remaining//60}:{remaining%60:02d}"
         )
     else:
         text = (
             "☕ СТАТУС ЧАЙНИКА\n\n"
-            "🟢 ВІЛЬНИЙ\n"
-            "☕ Можна вмикати"
+            "🟢 ВІЛЬНИЙ"
         )
 
     if status_message_id is None:
-        msg = await bot.send_message(chat_id=chat_id, text=text)
-        status_message_id = msg.message_id
+        msg = await bot.send_message(chat_id, text)
         status_chat_id = chat_id
+        status_message_id = msg.message_id
     else:
-        try:
-            await bot.edit_message_text(
-                chat_id=status_chat_id,
-                message_id=status_message_id,
-                text=text
-            )
+        await bot.edit_message_text(
+            chat_id=status_chat_id,
+            message_id=status_message_id,
+            text=text
+        )
         except:
             pass
 
@@ -86,6 +87,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         kettle_busy_until = now + 7 * 60
 
+        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
+
+        status_chat_id = chat_id
+        status_message_id = msg.message_id        
         asyncio.create_task(
             countdown_global(context.bot)
 )
