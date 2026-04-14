@@ -94,19 +94,42 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("☕ Скинуто адміном")
 
 async def countdown_message(bot, chat_id, message_id, seconds):
-    while seconds >= 0:
-        mins = seconds // 60
-        secs = seconds % 60
+    end_time = time.time() + seconds
+
+    last_text = None
+
+    while True:
+        remaining = int(end_time - time.time())
+
+        if remaining <= 0:
+            try:
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text="☕ ЧАЙНИК ВІЛЬНИЙ ✅"
+                )
+            except Exception as e:
+                print("Final edit error:", e)
+            break
+
+        mins = remaining // 60
+        secs = remaining % 60
 
         text = f"☕ Чайник\n⏳ {mins}:{secs:02d}"
 
-        try:
-            await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=text)
-        except:
-            pass
+        # оновлюємо тільки якщо змінилось
+        if text != last_text:
+            try:
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    text=text
+                )
+                last_text = text
+            except Exception as e:
+                print("Edit error:", e)
 
         await asyncio.sleep(1)
-        seconds -= 1
 
 
 app = Application.builder().token(TOKEN).build()
