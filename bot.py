@@ -110,9 +110,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         kettle_busy_until = now + 7 * 60
 
-        msg = await update.message.reply_text("☕ Чайник увімкнено")
+        msg = await update.message.reply_text("☕ Чайник увімкнено\n⏳ 7:00")
 
-        asyncio.create_task(countdown_loop(context.bot, chat_id))
+        asyncio.create_task(
+            countdown_loop(context.bot, chat_id, msg.message_id)
+)
 
         for user in users:
             try:
