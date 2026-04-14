@@ -34,14 +34,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 )
 
 
-def get_status_text():
-    now = time.time()
 
-    if now < kettle_busy_until:
-        remaining = int(kettle_busy_until - now)
-        return f"☕ Чайник УВІМКНЕНО\n⏳ {remaining//60}:{remaining%60:02d}"
-    else:
-        return "☕ Чайник ВІЛЬНИЙ ✅"
 
 async def update_status(bot, chat_id):
     global status_message_id, status_chat_id, kettle_busy_until
@@ -88,25 +81,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         now = time.time()
 
         if now < kettle_busy_until:
-            remaining = int(kettle_busy_until - now)
-
-            await update.message.reply_text(
-                f"⛔ СТОП! НЕ ВМИКАТИ!\n"
-                f"☕ Чайник вже увімкнено\n"
-                f"⏳ {remaining//60}:{remaining%60:02d}"
-            )
+            await update_status(context.bot, chat_id)
             return
-
+        
         kettle_busy_until = now + 7 * 60
 
-        
-        msg = await update.message.reply_text(
-            "☕ Чайник увімкнено\n⏳ 7:00"
-        )
-
         asyncio.create_task(
-            countdown_message(context.bot, chat_id, msg.message_id, 7*60)
-        )
+            countdown_global(context.bot)
+)
         await update_status(context.bot, chat_id)
         
         for user in users:
@@ -129,6 +111,31 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         kettle_busy_until = 0
         await update.message.reply_text("☕ Скинуто адміном")
+
+async def countdown_global(bot):
+    global kettle_busy_until
+
+    while True:
+        now = time.time()
+
+        if now >= kettle_busy_until:
+            kettle_busy_until = 0
+
+            if status_chat_id and status_message_id:
+                try:
+                    await bot.edit_message_text(
+                        chat_id=status_chat_id,
+                        message_id=status_message_id,
+                        text="☕ СТАТУС ЧАЙНИКА\n\n🟢 ВІЛЬНИЙ\n☕ Можна вмикати"
+                    )
+                except:
+                    pass
+            break
+
+        await update_status(bot, status_chat_id)
+
+        await asyncio.sleep(1)
+
 
 async def countdown_message(bot, chat_id, message_id, seconds):
     end_time = time.time() + seconds
