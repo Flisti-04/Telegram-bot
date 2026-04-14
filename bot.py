@@ -11,8 +11,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = 1679453575
 users = set()
 
-
-
+last_timer_message_id = None
 kettle_busy_until = 0
 
 keyboard = ReplyKeyboardMarkup(
@@ -95,10 +94,16 @@ async def countdown_loop(bot, chat_id, message_id):
 
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global kettle_busy_until
+    global kettle_busy_until, last_timer_message_id
 
     text = update.message.text
     chat_id = update.effective_chat.id
+
+    # 🧹 видаляємо команду користувача (опціонально)
+    try:
+        await update.message.delete()
+    except:
+        pass
 
     if text == "☕ Увімкнути чайник":
 
@@ -107,7 +112,16 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # якщо вже працює
         if now < kettle_busy_until:
 
-            msg = await update.message.reply_text("☕ Чайник вже працює")
+            # 🗑 видаляємо попередній таймер
+            if last_timer_message_id:
+                try:
+                    await context.bot.delete_message(chat_id, last_timer_message_id)
+                except:
+                    pass
+
+            msg = await context.bot.send_message(chat_id, "☕ Чайник вже працює")
+
+            last_timer_message_id = msg.message_id
 
             asyncio.create_task(
                 countdown_loop(context.bot, chat_id, msg.message_id)
@@ -117,23 +131,57 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # якщо вільний → стартуємо
         kettle_busy_until = now + 7 * 60
 
-        msg = await update.message.reply_text("☕ Чайник увімкнено")
+        # 🗑 видаляємо попередній таймер
+        if last_timer_message_id:
+            try:
+                await context.bot.delete_message(chat_id, last_timer_message_id)
+            except:
+                pass
+
+        msg = await context.bot.send_message(chat_id, "☕ Чайник увімкнено")
+
+        last_timer_message_id = msg.message_id
 
         asyncio.create_task(
             countdown_loop(context.bot, chat_id, msg.message_id)
         )
 
     elif text == "🔍 Статус":
-        await update_status(context.bot, chat_id)
+
+        now = time.time()
+        remaining = int(kettle_busy_until - now)
+
+        if last_timer_message_id:
+            try:
+                await context.bot.delete_message(chat_id, last_timer_message_id)
+            except:
+                pass
+
+        if remaining > 0:
+            msg = await context.bot.send_message(chat_id, "☕ Статус")
+            last_timer_message_id = msg.message_id
+
+            asyncio.create_task(
+                countdown_loop(context.bot, chat_id, msg.message_id)
+            )
+        else:
+            await context.bot.send_message(chat_id, "☕ Чайник вільний")
 
     elif text == "🛠 Скинути чайник":
 
         if not is_admin(update):
-            await update.message.reply_text("⛔ Немає доступу")
+            await context.bot.send_message(chat_id, "⛔ Немає доступу")
             return
 
         kettle_busy_until = 0
-        await update.message.reply_text("☕ Скинуто адміном")
+
+        if last_timer_message_id:
+            try:
+                await context.bot.delete_message(chat_id, last_timer_message_id)
+            except:
+                pass
+
+        await context.bot.send_message(chat_id, "☕ Скинуто адміном")
 
 async def countdown_global(bot):
     global kettle_busy_until
