@@ -61,25 +61,36 @@ async def update_status(bot, chat_id):
             "☕ Можна вмикати"
         )
 
-    await bot.send_message(chat_id=chat_id, text=text)   
+
 # --- створення або оновлення повідомлення ---
 
 
-async def countdown_loop(bot, chat_id):
+async def countdown_loop(bot, chat_id, message_id):
     global kettle_busy_until
 
     while True:
         now = time.time()
+        remaining = int(kettle_busy_until - now)
 
-        if kettle_busy_until == 0:
+        if remaining <= 0:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text="☕ ЧАЙНИК ВІЛЬНИЙ"
+            )
             break
 
-        if now >= kettle_busy_until:
-            kettle_busy_until = 0
-            await bot.send_message(chat_id, "☕ ЧАЙНИК ВІЛЬНИЙ")
-            break
+        text = f"☕ Чайник\n⏳ {remaining//60}:{remaining%60:02d}"
 
-        await update_status(bot, chat_id)
+        try:
+            await bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=message_id,
+                text=text
+            )
+        except:
+            pass
+
         await asyncio.sleep(1)
 
 
