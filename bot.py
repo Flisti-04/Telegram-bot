@@ -64,7 +64,7 @@ if text == "☕ Увімкнути чайник":
 
         return
 
-        kettle_busy_until = now + 7 * 60
+    kettle_busy_until = now + 7 * 60
 
     msg = await update.message.reply_text(
         "☕ Чайник увімкнено\n⏳ 7:00"
