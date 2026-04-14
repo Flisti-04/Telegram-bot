@@ -7,8 +7,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, ContextTyp
 
 TOKEN = os.getenv("BOT_TOKEN")
 
-status_message_id = None
-status_chat_id = None
+
 ADMIN_ID = 1679453575
 users = set()
 
@@ -62,22 +61,8 @@ async def update_status(bot, chat_id):
             "☕ Можна вмикати"
         )
 
-    # --- створення або оновлення повідомлення ---
-    if status_message_id is None:
-        msg = await bot.send_message(chat_id=chat_id, text=text)
-
-        status_chat_id = chat_id
-        status_message_id = msg.message_id
-
-    else:
-        try:
-            await bot.edit_message_text(
-                chat_id=status_chat_id,
-                message_id=status_message_id,
-                text=text
-            )
-        except:
-            pass
+    await bot.send_message(chat_id=chat_id, text=text)   
+# --- створення або оновлення повідомлення ---
 
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global kettle_busy_until
