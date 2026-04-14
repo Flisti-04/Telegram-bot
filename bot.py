@@ -45,30 +45,37 @@ async def update_status(bot, chat_id):
 
     now = time.time()
 
+    # --- формуємо текст статусу ---
     if now < kettle_busy_until:
         remaining = int(kettle_busy_until - now)
+
         text = (
             "☕ СТАТУС ЧАЙНИКА\n\n"
             "🟠 ЗАЙНЯТИЙ\n"
-            f"⏳ {remaining//60}:{remaining%60:02d}"
+            f"⏳ Залишилось: {remaining//60}:{remaining%60:02d}\n\n"
+            "🚫 Вмикати зараз не можна"
         )
     else:
         text = (
             "☕ СТАТУС ЧАЙНИКА\n\n"
-            "🟢 ВІЛЬНИЙ"
+            "🟢 ВІЛЬНИЙ\n"
+            "☕ Можна вмикати"
         )
 
+    # --- створення або оновлення повідомлення ---
     if status_message_id is None:
-        msg = await bot.send_message(chat_id, text)
+        msg = await bot.send_message(chat_id=chat_id, text=text)
+
         status_chat_id = chat_id
         status_message_id = msg.message_id
+
     else:
         try:
             await bot.edit_message_text(
                 chat_id=status_chat_id,
                 message_id=status_message_id,
                 text=text
-        )
+            )
         except:
             pass
 
