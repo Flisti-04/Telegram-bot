@@ -63,10 +63,11 @@ async def update_status(bot, chat_id):
         status_chat_id = chat_id
         status_message_id = msg.message_id
     else:
-        await bot.edit_message_text(
-            chat_id=status_chat_id,
-            message_id=status_message_id,
-            text=text
+        try:
+            await bot.edit_message_text(
+                chat_id=status_chat_id,
+                message_id=status_message_id,
+                text=text
         )
         except:
             pass
