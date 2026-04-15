@@ -11,8 +11,18 @@ TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = 1679453575
 users = set()
 
+last_click_time = {}
+kettle_stats = {
+    "starts": 0
+}
+
 last_timer_message_id = None
 kettle_busy_until = 0
+last_click_time = {}
+
+kettle_stats = {
+    "starts": 0
+}
 
 keyboard = ReplyKeyboardMarkup(
     [
@@ -98,7 +108,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
     chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    now_click = time.time()
 
+    if user_id in last_click_time:
+        if now_click - last_click_time[user_id] < 2:
+            return
+
+    last_click_time[user_id] = now_click
     # 🧹 видаляємо команду користувача (опціонально)
     try:
         await update.message.delete()
@@ -131,6 +148,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # якщо вільний → стартуємо
         kettle_busy_until = now + 7 * 60
 
+        kettle_stats["starts"] += 1
+
+        print(f"[LOG] User {user_id} started kettle at {time.time()}")
+        
+        
         # 🗑 видаляємо попередній таймер
         if last_timer_message_id:
             try:
@@ -182,6 +204,14 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pass
 
         await context.bot.send_message(chat_id, "☕ Скинуто адміном")
+
+    elif text == "📊 Статистика":
+    await context.bot.send_message(
+        chat_id,
+        f"📊 СТАТИСТИКА\n\n☕ Запусків: {kettle_stats['starts']}"
+    )
+
+
 
 async def countdown_global(bot):
     global kettle_busy_until
