@@ -206,9 +206,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id, "☕ Скинуто адміном")
 
     elif text == "📊 Статистика":
-    await context.bot.send_message(
-        chat_id,
-        f"📊 СТАТИСТИКА\n\n☕ Запусків: {kettle_stats['starts']}"
+        await context.bot.send_message(
+            chat_id,
+            f"📊 СТАТИСТИКА\n\n☕ Запусків: {kettle_stats['starts']}"
     )
 
 
